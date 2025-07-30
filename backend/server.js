@@ -13,10 +13,11 @@ const {generateInterviewQuestions, generateConceptExplanation}  = require('./con
 const app = express();
 
 app.use(cors({
-origin: "*",
-methods: ["GET","POST","PUT","DELETE"] ,
-allowedHeaders: ["Content-Type","Authorization"]
-}))
+  origin: ["https://prep-ai-smoky.vercel.app"],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
 
 connectDB();
 
