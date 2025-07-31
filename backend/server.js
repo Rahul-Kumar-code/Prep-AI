@@ -13,7 +13,7 @@ const {generateInterviewQuestions, generateConceptExplanation}  = require('./con
 const app = express();
 
 app.use(cors({
-  origin: ["https://prep-l71ndwtfv-rahul-kumar-s-projects-9c44638f.vercel.app"],
+  origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
