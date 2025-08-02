@@ -54,7 +54,13 @@ function App() {
     <DashboardLayout>
       <div className="container mx-auto p-5 h-screen">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-7 pt-1 pb-6  px-4 md:px-0">
-          {sessions.length===0? <div className="text-5xl w-full text-center text-emerald-500">Click on 'Add New' to create session</div>:""}
+          {sessions.length === 0 ? (
+  <div className="flex items-center justify-center h-full text-gray-500 text-lg font-medium bg-gray-50 rounded-md border border-dashed border-gray-300 p-6">
+    Click on 'Add New' to create a session
+  </div>
+) : (
+  ""
+)}
           {sessions?.map((data, index) => (
             <SummaryCard
               key={data?._id}

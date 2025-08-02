@@ -5,11 +5,14 @@ import { validateEmail } from "../../utils/helper";
 import { API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosInstance";
 import { UserContext } from "../../context/userContext";
+import toast from "react-hot-toast";
+import SpinnerLoader from "../../components/Loader/SpinnerLoader";
 
 function Login({ setCurrentPage }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Fixed: Use useContext instead of createContext
   const { updateUser } = useContext(UserContext);
@@ -26,7 +29,7 @@ function Login({ setCurrentPage }) {
       setError("please enter the password");
       return;
     }
-
+        setIsLoading(true)
     // Login API Call
     try {
       const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
@@ -46,7 +49,7 @@ function Login({ setCurrentPage }) {
         setError("Login failed: No token received");
       }
     } catch (error) {
-      console.error("Login error:", error); // Debug log
+      toast.error("Failed to login!");
       if (error.response && error.response.data.message){
             setError(error.response.data.message);
       }
@@ -81,8 +84,9 @@ function Login({ setCurrentPage }) {
         <button
           type="submit"
           className="w-full bg-black text-white p-2 mt-5 cursor-pointer rounded-md hover:bg-indigo-500"
+          disabled={isLoading}
         >
-          LOGIN
+           {isLoading && <SpinnerLoader />} {!isLoading && <span>LOGIN</span>}
         </button>
 
         <p className="text-[17px] text-slate-800 mt-4">

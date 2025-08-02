@@ -35,20 +35,20 @@ function LandingPage() {
       {user ? (
         <ProfileInfoCard />
       ) : (
-        <button
-          className="bg-gradient-to-r from-sky-400 to-purple-500
-                     text-sm font-semibold text-white px-7 py-2.5 
-                     rounded-full border border-white cursor-pointer
-                     transition-all duration-300 ease-in-out 
-                     transform hover:scale-105 hover:shadow-xl 
-                     hover:from-purple-500 hover:to-sky-400 
-                     hover:border-sky-100"
-          onClick={() => {
-            setOpenAuthModel(true);
-          }}
-        >
-          Login / Sign Up
-        </button>
+       <button
+  onClick={() => setOpenAuthModel(true)}
+  className="relative inline-block px-7 py-2.5 rounded-full text-sm font-semibold text-white 
+             bg-transparent border border-white cursor-pointer overflow-hidden 
+             transition-all duration-300 group"
+>
+  <span className="relative z-10">Login / Sign Up</span>
+
+  {/* Left to right background fill on hover */}
+  <span className="absolute inset-0 bg-gradient-to-r from-rose-400 to-indigo-500 
+                   scale-x-0 origin-left rounded-full transition-transform duration-300 
+                   group-hover:scale-x-100 z-0" />
+</button>
+
       )}
     </header>
 
@@ -76,15 +76,21 @@ function LandingPage() {
           dive deeper into concepts, and organize everything your way.
           From preparation to mastery - your ultimate interview toolkit is here.
         </p>
-        <button
-          className="bg-gradient-to-r from-emerald-500 to-sky-500 
-                     text-sm font-semibold text-white px-7 py-2.5 
-                     rounded-full shadow-md hover:from-sky-500 hover:to-purple-500 hover:scale-105 
-                     hover:shadow-xl transition-all duration-300 ease-in-out cursor-pointer"
-          onClick={handleCTA}
-        >
-           Get Started
-        </button>
+       <button
+  className="relative px-7 py-2.5 rounded-full text-sm font-semibold text-white 
+             bg-gradient-to-r from-emerald-500 to-sky-500 
+             shadow-md transition-all duration-300 ease-in-out 
+             before:absolute before:inset-0 before:rounded-full 
+             before:border-2 before:border-white before:opacity-0 
+             before:scale-75 before:transition-transform before:duration-300 
+             hover:before:opacity-100 hover:before:scale-100 
+             hover:shadow-[0_0_15px_rgba(255,255,0,0.4)] 
+             hover:animate-pulse-glow overflow-hidden z-0 cursor-pointer"
+  onClick={handleCTA}
+>
+  <span className="relative z-10">Get Started</span>
+</button>
+
       </div>
     </div>
   </div>

@@ -8,6 +8,7 @@ import { UserContext } from "../../context/userContext";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { toast } from "react-hot-toast";
+import SpinnerLoader from "../../components/Loader/SpinnerLoader";
 
 
 function App({ setCurrentPage }) {
@@ -15,6 +16,8 @@ function App({ setCurrentPage }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  
 
   const [error, setError] = useState(null);
 
@@ -36,13 +39,14 @@ function App({ setCurrentPage }) {
           setError("Please enter the password");
           return;
         }
-    
+    setIsLoading(true);
         //SignUp API Call
         try {
           if(profilePic){
             const imageUploadRes = await uploadImage(profilePic);
             profileImageUrl = imageUploadRes.imageUrl || "";
           }
+          
       const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
         name: fullName,
         email,
@@ -63,7 +67,7 @@ function App({ setCurrentPage }) {
       if (error.response && error.response.data.message){
         setError(error.response.data.message);}
       else {setError("Something went wrong, Please try again.");}
-    }
+    }finally{setIsLoading(false)};
   };
   return (
     <div className="w-[90vw] md:w-[33vw] p-7 flex flex-col justify-center">
@@ -100,7 +104,7 @@ function App({ setCurrentPage }) {
           type="submit"
           className="w-full bg-black text-white p-2 mt-5 cursor-pointer rounded-md hover:bg-indigo-500"
         >
-          Sign Up
+           {isLoading && <SpinnerLoader />} {!isLoading && <span>Sign Up</span>}
         </button>
 
         <p className="text-[17px] text-slate-800 mt-4">
