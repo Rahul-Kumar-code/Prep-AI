@@ -111,11 +111,11 @@ function CreateSessionform() {
           type="text"
         />
 
-        {error && <p className="text-xs text-red-500 pb-2.5'">{error}</p>}
+        {error && <p className="text-[14px] text-red-500">{error}</p>}
 
         <button
           type="submit"
-          className="w-full bg-black text-white p-2 mt-5 cursor-pointer rounded-md hover:bg-indigo-500"
+          className="w-full bg-black text-white p-2 mt-2 cursor-pointer rounded-md hover:bg-indigo-500"
           disabled={isLoading}
         >
           <div className="flex justify-center items-center gap-3">

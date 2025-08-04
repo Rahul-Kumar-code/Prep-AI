@@ -58,7 +58,7 @@ function ProfilePhotoSelector({image, setImage, preview, setPreview}) {
         <button
         type="button"
         onClick={handleRemoveImage}
-        className='w-9 h-9 bg-red-500 flex items-center justify-center text-white rounded-full absolute -bottom-2 -right-2 cursor-pointer'
+        className='w-9 h-9 bg-rose-500 flex items-center justify-center text-white rounded-full absolute -bottom-2 -right-2 cursor-pointer'
         >
           <LuTrash/>
         </button>

@@ -37,14 +37,13 @@ function Login({ setCurrentPage }) {
         password,
       });
 
-      console.log("Login response:", response.data); // Debug log
-
       const { token } = response.data;
       if (token) {
         localStorage.setItem("token", token);
         updateUser(response.data);
         // Navigate to dashboard
         navigate('/dashboard');
+        toast.success("Login successfully");
       } else {
         setError("Login failed: No token received");
       }

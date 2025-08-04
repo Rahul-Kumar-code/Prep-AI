@@ -37,23 +37,26 @@ exports.addQuestionsToSession = async (req,res) =>{
 }
 
 //toggle Pin Question
-exports.togglePinQuestion = async (req,res) =>{
-      try{
-      const question = await Question.findById(req.params.id);
+exports.togglePinQuestion = async (req, res) => {
+  try {
+    const question = await Question.findById(req.params.id);
+    if (!question) {
+      return res.status(404).json({ success: false, message: "question not found" });
+    }
 
-       if(!question){
-        return res.status(404).json({success: false, message: "question not found"})
-       }
-        
-       question.isPinned = !question.isPinned;
-       await question.save();
-       
-        return res.status(200).json({success: true, question});
-  }catch(error){
-      return res.status(500).json({message: "server error"});
+    const updatedQuestion = await Question.findByIdAndUpdate(
+      req.params.id,
+      { isPinned: !question.isPinned },
+      { new: true }
+    );
+
+    return res.status(200).json({ success: true, question: updatedQuestion });
+  } catch (error) {
+    console.error("Error in togglePinQuestion:", error);
+    return res.status(500).json({ message: "server error" });
   }
+};
 
-}
 
 //Update question note
 exports.updateQuestionNote = async (req,res) =>{

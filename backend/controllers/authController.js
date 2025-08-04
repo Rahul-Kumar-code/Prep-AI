@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 
 //generate jwt token
 const generateToken = (userId) =>{
-  return jwt.sign({id: userId},process.env.JWT_SECRET, {expiresIn: "7d"});
+  return jwt.sign({id: userId},process.env.JWT_SECRET, {expiresIn: "1d"});
 };
 
 //Register User
@@ -25,7 +25,6 @@ const registerUser = async (req,res) =>{
         const user = new User({name,email, password: hashedPassword, profileImageUrl});
         
         await user.save();
-        console.log("New User Registered:", user);
 
          //Return user data with JWT
         res.status(201).json({

@@ -32,11 +32,10 @@ function QuestionCard({
       onClick={toggleExpand}>
         <div className="flex items-start gap-3.5">
           <span className="text-xs md:text-[15px] font-semibold text-gray-400 leading-[18px]">
-            Q <span>{queNumber+1}</span>
+            Q{queNumber+1}
           </span>
           <h3
             className="text-xs md:text-[14px] font-medium text-gray-800 mr-0 md:mr-20"
-            onClick={toggleExpand}
           >
             {question}
           </h3>

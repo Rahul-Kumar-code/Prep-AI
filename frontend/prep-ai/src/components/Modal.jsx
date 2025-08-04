@@ -14,7 +14,7 @@ function Modal({isOpen, onClose, children,title, hideHeader}) {
           )}
        <button
        type="button"
-       className='hover:bg-orange-100 hover:text-gray-700 rounded-lg text-sm w-7 h-7
+       className='hover:bg-rose-200 hover:text-gray-700 rounded-lg text-sm w-7 h-7
 text-gray-400 bg-transparent flex justify-center items-center absolute top-3.5 right-3.5 cursor-pointer'
        onClick={onClose}
        >

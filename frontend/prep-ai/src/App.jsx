@@ -23,7 +23,7 @@ function App() {
       toastOptions={{
         className : "",
         style : {
-        fontSize : "14px",
+        fontSize : "18px",
         },
       }}/>
     </div>

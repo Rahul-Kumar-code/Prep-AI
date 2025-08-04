@@ -3,7 +3,7 @@ import React from 'react';
 const DeleteAlertContent = ({ content, onDelete }) => {
   return (
     <div className="p-6">
-      <p className="text-[15px]">{content}</p>
+      <p className="text-[16px] text-gray-900">{content}</p>
 
       <div className="flex justify-end mt-6">
         <button

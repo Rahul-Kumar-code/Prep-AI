@@ -38,7 +38,7 @@ bg-white rounded-md flex items-center justify-center mr-4">
             <div className="flex items-start justify-between ">
               {/* Title and Skills */}
               <div>
-                <h2 className="text-[17px] font-medium">{role}</h2>
+                <h2 className="text-[17px] font-medium text-black">{role}</h2>
                 <p className="text-sm font-medium text-gray-900">{topicsToFocus}</p>
               </div>
             </div>
