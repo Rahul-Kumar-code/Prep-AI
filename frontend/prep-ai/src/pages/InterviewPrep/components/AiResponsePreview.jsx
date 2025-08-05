@@ -9,7 +9,7 @@ const AIResponsePreview = ({ content }) => {
   if (!content) return null;
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto text-black">
       <div className="text-[14px] font-sans prose prose-slate dark:prose-invert max-w-none">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
