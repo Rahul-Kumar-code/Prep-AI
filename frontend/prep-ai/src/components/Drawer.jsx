@@ -4,7 +4,7 @@ import { LuX } from 'react-icons/lu';
 const Drawer = ({ isOpen, onClose, title, children }) => {
   return (
     <div
-      className={`fixed top-[64px] right-0 z-40 h-[calc(100dvh-64px)] p-4 overflow-y-auto transition-transform  bg-white shadow-2xl w-full md:w-[40vw] shadow-cyan-800/10 border-r border-l-gray-800 ${
+      className={`fixed top-[64px] right-0 z-40 h-[calc(100dvh-64px)] p-4 overflow-y-auto transition-transform  bg-white shadow-2xl w-full md:w-[40vw] shadow-cyan-800/10 border-r border-l-gray-800 text-black ${
         isOpen ? 'translate-x-0' : 'translate-x-full'
       }`}
       tabIndex="-1"
