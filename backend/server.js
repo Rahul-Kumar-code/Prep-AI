@@ -34,5 +34,11 @@ app.use('/api/questions',questionRoutes);
 app.use("/api/ai/generate-questions",protect,generateInterviewQuestions);
 app.use("/api/ai/generate-explanation", protect, generateConceptExplanation) ;
 
-const PORT = process.env.PORT || 5000;
+app.use(express.static(path.join(__dirname, "public")));
+
+app.use(/.*/,(req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+const PORT = process.env.PORT || 8000;
 app.listen(PORT, ()=>{console.log(`server is running on http://localhost:${PORT}`)});
