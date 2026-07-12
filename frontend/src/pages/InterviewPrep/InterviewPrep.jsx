@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 import { useParams } from "react-router-dom";
 import moment from "moment";
 import { AnimatePresence, motion } from "framer-motion";
@@ -22,6 +23,9 @@ const InterviewPrep = () => {
 
   const [openLeanMoreDrawer, setOpenLeanMoreDrawer] = useState(false);
   const [explanation, setExplanation] = useState(null);
+  const [streamedText, setStreamedText] = useState("");
+  const [streamTitle, setStreamTitle] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isUpdateLoader, setIsUpdateLoader] = useState(false);
@@ -41,28 +45,144 @@ const InterviewPrep = () => {
     }
   };
 
-  // Generate Concept Explanation
+  // Generate Concept Explanation with streaming
   const generateConceptExplanation = async (question) => {
-    try {
-      setErrorMsg("");
-      setExplanation("");
+    // Reset all state for a fresh request
+    setErrorMsg("");
+    setExplanation(null);
+    setStreamedText("");
+    setStreamTitle("");
+    setIsLoading(true);
+    setIsStreaming(false);
+    setOpenLeanMoreDrawer(true);
 
-      setIsLoading(true);
-      setOpenLeanMoreDrawer(true);
-      const response = await axiosInstance.post(
-        API_PATHS.AI.GENERATE_EXPLANATION,
-        { question }
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        `${import.meta.env.VITE_BASE_URL}${API_PATHS.AI.GENERATE_EXPLANATION}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+          body: JSON.stringify({ question }),
+        }
       );
 
-      if (response.data) {
-        setExplanation(response.data);
+      if (!response.ok || !response.body) {
+        throw new Error("Failed to connect to the server.");
       }
-    } catch (err) {
-      setExplanation(null);
-      setErrorMsg("failed to generate explanation, Try again later");
-      console.error("Error : ", err);
-    } finally {
+
+      const contentType = response.headers.get("Content-Type") || "";
+      console.log("[STREAM] Response Content-Type:", contentType);
+
+      // ── Fallback: old backend returns plain JSON (not yet redeployed) ──
+      if (contentType.includes("application/json")) {
+        console.log("[STREAM] Non-SSE response detected. Reading as JSON.");
+        const data = await response.json();
+        if (data?.title && data?.explanation) {
+          setStreamTitle(data.title);
+          setExplanation({ title: data.title, explanation: data.explanation });
+        } else {
+          setErrorMsg("Failed to generate explanation. Try again later.");
+        }
+        setIsLoading(false);
+        setIsStreaming(false);
+        return;
+      }
+
+      // ── SSE streaming path (new backend) ──
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let accumulatedText = "";
+      let buffer = "";
+
       setIsLoading(false);
+      setIsStreaming(true);
+
+      while (true) {
+        const { value, done } = await reader.read();
+
+        // Decode whatever we have (including final flush on done)
+        if (value) {
+          buffer += decoder.decode(value, { stream: !done });
+        }
+
+        // Process all complete SSE messages in the buffer
+        const messages = buffer.split("\n\n");
+        // If not done, keep the last potentially incomplete message in the buffer
+        // If done, process everything (no more data is coming)
+        buffer = done ? "" : (messages.pop() ?? "");
+
+        for (const message of messages) {
+          const trimmed = message.trim();
+          if (!trimmed.startsWith("data:")) continue;
+
+          const jsonStr = trimmed.slice(5).trim();
+          if (!jsonStr) continue;
+
+          console.log("[SSE] Raw message received:", jsonStr.slice(0, 80));
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+
+            if (parsed.error) {
+              console.error("[SSE] Server error:", parsed.error);
+              setErrorMsg("Failed to generate explanation. Please try again.");
+              setIsStreaming(false);
+              return;
+            }
+
+            if (parsed.done) {
+              console.log("[SSE] Stream complete. Total length:", accumulatedText.length);
+              // Extract title from the first # heading line
+              const allLines = accumulatedText.split("\n");
+              const titleLine = allLines.find((l) => l.startsWith("# "));
+              const title = titleLine ? titleLine.replace(/^#\s*/, "").trim() : "";
+              const body = accumulatedText.replace(/^#[^\n]*\n?/, "").trim();
+
+              setStreamTitle(title);
+              setExplanation({ title, explanation: body });
+              setIsStreaming(false);
+              return;
+            }
+
+            if (parsed.chunk) {
+              accumulatedText += parsed.chunk;
+              // flushSync forces React to paint immediately after each chunk
+              // — bypasses React 18 batching so text appears word-by-word
+              flushSync(() => {
+                setStreamedText((prev) => prev + parsed.chunk);
+              });
+            }
+          } catch (e) {
+            console.warn("[SSE] Failed to parse message:", jsonStr, e);
+          }
+        }
+
+        if (done) break;
+      }
+
+      // Fallback: stream ended without a {done:true} event — finalize with what we have
+      if (accumulatedText) {
+        console.log("[SSE] Stream ended without done event. Finalizing from buffer.");
+        const allLines = accumulatedText.split("\n");
+        const titleLine = allLines.find((l) => l.startsWith("# "));
+        const title = titleLine ? titleLine.replace(/^#\s*/, "").trim() : "";
+        const body = accumulatedText.replace(/^#[^\n]*\n?/, "").trim();
+        setStreamTitle(title);
+        setExplanation({ title, explanation: body });
+      } else {
+        setErrorMsg("Failed to generate explanation. Try again later.");
+      }
+      setIsStreaming(false);
+      setIsLoading(false);
+    } catch (err) {
+      setIsLoading(false);
+      setIsStreaming(false);
+      setErrorMsg("Failed to generate explanation. Try again later.");
+      console.error("Streaming error:", err);
     }
   };
 
@@ -206,18 +326,34 @@ const InterviewPrep = () => {
           <Drawer
             isOpen={openLeanMoreDrawer}
             onClose={() => setOpenLeanMoreDrawer(false)}
-            title={!isLoading && explanation?.title}
+            title={
+              streamTitle ||
+              (!isLoading && !isStreaming && explanation?.title) ||
+              ""
+            }
           >
             {errorMsg && (
               <p className="flex gap-2 text-sm text-amber-600 font-medium">
                 <LuCircleAlert className="mt-1"></LuCircleAlert>
+                {errorMsg}
               </p>
             )}
-            {isLoading && <SkeletonLoader />}
-            {!isLoading && explanation && (
-              <AIResponsePreview
-                content={explanation?.explanation}
-              ></AIResponsePreview>
+
+            {/* Loading indicator: only shown while waiting for the stream to begin */}
+            {isLoading && (
+              <div className="p-4 text-gray-500 animate-pulse">
+                Thinking...
+              </div>
+            )}
+
+            {/* Live streaming view: render as soon as streaming begins */}
+            {isStreaming && streamedText && (
+              <AIResponsePreview content={streamedText} />
+            )}
+
+            {/* Final completed view */}
+            {!isLoading && !isStreaming && explanation && (
+              <AIResponsePreview content={explanation?.explanation} />
             )}
           </Drawer>
         </div>

@@ -30,31 +30,48 @@ const generateInterviewQuestions = async (req,res) => {
    return res.status(500).json({message: "Failed to generate questions", error: error.message})
   }
 }
-const generateConceptExplanation = async (req,res) => {
-  try{
-    const {question} = req.body;
+const generateConceptExplanation = async (req, res) => {
+  const { question } = req.body;
 
-     if(!question){
-      return res.status(400).json({message: "Missing required fields"});
-     }
+  if (!question) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
 
-     const prompt = conceptExplainPrompt(question);
+  // Set SSE headers for streaming
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no"); // Disable nginx buffering if applicable
+  res.flushHeaders();
 
-     const response = await ai.models.generateContent({
-       model: "gemini-2.5-flash-lite",
-       contents: prompt,
-     })
+  try {
+    const prompt = conceptExplainPrompt(question);
 
-     let rawText = response.text;
+    const streamResult = await ai.models.generateContentStream({
+      model: "gemini-2.5-flash-lite",
+      contents: prompt,
+    });
 
-     const cleanedText = rawText.replace(/^```json\s*/,"").replace(/```$/,"").trim();
-     
-     const data = JSON.parse(cleanedText);
+    for await (const chunk of streamResult) {
+      console.log("Chunk:", chunk);
+      console.log("Chunk text:", chunk.text);
 
-     return res.status(200).json(data);
+      const chunkText = chunk.text;
+      if (chunkText) {
+        const ssePayload = `data: ${JSON.stringify({ chunk: chunkText })}\n\n`;
+        res.write(ssePayload);
+        if (typeof res.flush === 'function') res.flush();
+      }
+    }
 
-  }catch(error){
-   return res.status(500).json({message: "Failed to generate explanation", error: error.message})
+    // Signal the client that the stream is complete
+    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+    if (typeof res.flush === 'function') res.flush();
+    res.end();
+  } catch (error) {
+    // Send error as an SSE event so the client can handle it gracefully
+    res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
+    res.end();
   }
 };
 
