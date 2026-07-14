@@ -59,7 +59,7 @@ const InterviewPrep = () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}${API_PATHS.AI.GENERATE_EXPLANATION}`,
+        API_PATHS.AI.GENERATE_EXPLANATION,
         {
           method: "POST",
           headers: {

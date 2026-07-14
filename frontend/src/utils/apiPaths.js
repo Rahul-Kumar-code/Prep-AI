@@ -1,4 +1,5 @@
-export const BASE_URL = import.meta.env.VITE_BASE_URL
+// API paths are relative (/api/...) — they resolve to the same origin in both
+// development (via Vite dev-server proxy) and production (Express serves the build).
 
 export const API_PATHS = {
   AUTH: {
