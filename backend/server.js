@@ -36,8 +36,17 @@ app.use("/api/ai/generate-explanation", protect, generateConceptExplanation) ;
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use(/.*/,(req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+app.get(/.*/, (req, res) => {
+  if (req.path.startsWith("/api/")) {
+    return res.status(404).json({message: "API route not found"});
+  }
+
+  const indexPath = path.join(__dirname, "public", "index.html");
+  res.sendFile(indexPath, (error) => {
+    if (error && !res.headersSent) {
+      res.status(503).send("Frontend build is not available on this deployment.");
+    }
+  });
 });
 
 const PORT = process.env.PORT || 8000;

@@ -89,7 +89,14 @@ const InterviewPrep = () => {
       );
 
       if (!response.ok || !response.body) {
-        throw new Error("Failed to connect to the server.");
+        let serverMessage = "Failed to connect to the server.";
+        try {
+          const errorData = await response.json();
+          serverMessage = errorData?.message || errorData?.error || serverMessage;
+        } catch {
+          // Keep the connection error when the server did not return JSON.
+        }
+        throw new Error(serverMessage);
       }
 
       const contentType = response.headers.get("Content-Type") || "";
@@ -186,7 +193,7 @@ const InterviewPrep = () => {
     } catch (err) {
       setIsLoading(false);
       setIsStreaming(false);
-      setErrorMsg("Failed to generate explanation. Try again later.");
+      setErrorMsg(err.message || "Failed to generate explanation. Try again later.");
       console.error("Streaming error:", err);
     }
   };

@@ -37,6 +37,12 @@ const generateConceptExplanation = async (req, res) => {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(503).json({
+      message: "AI service is not configured. Set GEMINI_API_KEY on the server.",
+    });
+  }
+
   // Set SSE headers for streaming
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
@@ -69,6 +75,7 @@ const generateConceptExplanation = async (req, res) => {
     if (typeof res.flush === 'function') res.flush();
     res.end();
   } catch (error) {
+    console.error("Failed to generate concept explanation:", error);
     // Send error as an SSE event so the client can handle it gracefully
     res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
     res.end();

@@ -53,6 +53,8 @@ function Login({ setCurrentPage }) {
             setError(error.response.data.message);
       }
       else {setError("Something went wrong, Please try again.");}
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: prepai
+    runtime: node
+    buildCommand: npm ci --prefix backend && npm ci --prefix frontend && npm run build --prefix frontend && rm -rf backend/public && cp -r frontend/dist backend/public
+    startCommand: npm start --prefix backend
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
