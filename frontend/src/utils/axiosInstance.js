@@ -1,10 +1,8 @@
 import axios from "axios";
+import { API_BASE_URL } from "./apiPaths";
 
 const axiosInstance = axios.create({
-  // Empty baseURL → requests are same-origin (/api/...) in both dev and production.
-  // Dev: Vite proxy forwards /api/* to the Express server.
-  // Production: Express serves the frontend build and handles /api/* directly.
-  baseURL: "",
+  baseURL: API_BASE_URL,
   timeout: 80000,
   headers: {
     "Content-Type": "application/json",

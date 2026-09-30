@@ -9,7 +9,7 @@ import { toast } from "react-hot-toast";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import RoleInfoHeader from "./components/RoleInfoHeader";
 import axiosInstance from "../../utils/axiosInstance";
-import { API_PATHS } from "../../utils/apiPaths";
+import { API_BASE_URL, API_PATHS } from "../../utils/apiPaths";
 import QuestionCard from "../../components/Cards/QuestionCard";
 import AIResponsePreview from "./components/AiResponsePreview";
 import Drawer from "../../components/Drawer";
@@ -77,7 +77,7 @@ const InterviewPrep = () => {
 
       const token = localStorage.getItem("token");
       const response = await fetch(
-        API_PATHS.AI.GENERATE_EXPLANATION,
+        `${API_BASE_URL}${API_PATHS.AI.GENERATE_EXPLANATION}`,
         {
           method: "POST",
           headers: {

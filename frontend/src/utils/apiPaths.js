@@ -1,5 +1,7 @@
-// API paths are relative (/api/...) — they resolve to the same origin in both
-// development (via Vite dev-server proxy) and production (Express serves the build).
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+
+// API paths stay relative so they work with the Vite proxy locally and with the
+// configured backend URL in a separately deployed frontend.
 
 export const API_PATHS = {
   AUTH: {
