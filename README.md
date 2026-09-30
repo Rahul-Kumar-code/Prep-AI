@@ -212,7 +212,7 @@ PORT=8000
 
 **`frontend/.env`**
 ```env
-VITE_API_BASE_URL=http://localhost:8000
+VITE_BASE_URL=http://localhost:8000
 ```
 
 ### Run
