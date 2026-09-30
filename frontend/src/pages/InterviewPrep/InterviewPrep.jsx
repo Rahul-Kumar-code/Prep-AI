@@ -57,6 +57,24 @@ const InterviewPrep = () => {
     setOpenLeanMoreDrawer(true);
 
     try {
+      const setFinalExplanation = (content, fallbackTitle = "Explanation") => {
+        const normalizedContent = String(content || "").trim();
+        const titleMatch = normalizedContent.match(/^\s*#\s+([^\r\n]+)\s*/);
+        const title = titleMatch ? titleMatch[1].trim() : fallbackTitle;
+        const body = titleMatch
+          ? normalizedContent.slice(titleMatch[0].length).trim()
+          : normalizedContent;
+
+        if (!body) {
+          setErrorMsg("The explanation response was empty. Try again later.");
+          return false;
+        }
+
+        setStreamTitle(title);
+        setExplanation({ title, explanation: body });
+        return true;
+      };
+
       const token = localStorage.getItem("token");
       const response = await fetch(
         API_PATHS.AI.GENERATE_EXPLANATION,
@@ -81,12 +99,11 @@ const InterviewPrep = () => {
       if (contentType.includes("application/json")) {
         console.log("[STREAM] Non-SSE response detected. Reading as JSON.");
         const data = await response.json();
-        if (data?.title && data?.explanation) {
-          setStreamTitle(data.title);
-          setExplanation({ title: data.title, explanation: data.explanation });
-        } else {
-          setErrorMsg("Failed to generate explanation. Try again later.");
-        }
+        const content =
+          typeof data === "string"
+            ? data
+            : data?.explanation || data?.text || data?.message;
+        setFinalExplanation(content, data?.title);
         setIsLoading(false);
         setIsStreaming(false);
         return;
@@ -110,7 +127,7 @@ const InterviewPrep = () => {
         }
 
         // Process all complete SSE messages in the buffer
-        const messages = buffer.split("\n\n");
+        const messages = buffer.split(/\r?\n\r?\n/);
         // If not done, keep the last potentially incomplete message in the buffer
         // If done, process everything (no more data is coming)
         buffer = done ? "" : (messages.pop() ?? "");
@@ -136,14 +153,7 @@ const InterviewPrep = () => {
 
             if (parsed.done) {
               console.log("[SSE] Stream complete. Total length:", accumulatedText.length);
-              // Extract title from the first # heading line
-              const allLines = accumulatedText.split("\n");
-              const titleLine = allLines.find((l) => l.startsWith("# "));
-              const title = titleLine ? titleLine.replace(/^#\s*/, "").trim() : "";
-              const body = accumulatedText.replace(/^#[^\n]*\n?/, "").trim();
-
-              setStreamTitle(title);
-              setExplanation({ title, explanation: body });
+              setFinalExplanation(accumulatedText);
               setIsStreaming(false);
               return;
             }
@@ -167,12 +177,7 @@ const InterviewPrep = () => {
       // Fallback: stream ended without a {done:true} event — finalize with what we have
       if (accumulatedText) {
         console.log("[SSE] Stream ended without done event. Finalizing from buffer.");
-        const allLines = accumulatedText.split("\n");
-        const titleLine = allLines.find((l) => l.startsWith("# "));
-        const title = titleLine ? titleLine.replace(/^#\s*/, "").trim() : "";
-        const body = accumulatedText.replace(/^#[^\n]*\n?/, "").trim();
-        setStreamTitle(title);
-        setExplanation({ title, explanation: body });
+        setFinalExplanation(accumulatedText);
       } else {
         setErrorMsg("Failed to generate explanation. Try again later.");
       }
